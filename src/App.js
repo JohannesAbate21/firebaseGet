@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
-import { useEffect, useState } from 'react';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import { getDatabase, ref, push, set } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCjYUIQtIGx5osC9vgNkIFz3v-iLqsI9PQ',
@@ -15,37 +14,44 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
-function App() {
-  const [userData, setUserData] = useState([]);
 
-  useEffect(() => {
+function App() {
+  const [name, setName] = useState('');
+  const [age, setAge] = useState('');
+
+  // Push Function
+  // Push Function
+  const pushData = () => {
     const userRef = ref(database, 'user');
-    onValue(userRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const userArray = Object.entries(data).map(([key, value]) => ({
-          id: key,
-          name: value.name,
-          age: value.age,
-        }));
-        setUserData(userArray);
-      } else {
-        setUserData([]);
-      }
-    });
-  }, []);
+    const newUserRef = push(userRef); // Generate a new child reference
+
+    set(newUserRef, {
+      name: name,
+      age: age,
+    })
+      .then(() => console.log('Data added successfully'))
+      .catch((error) => console.error('Error adding data: ', error));
+  };
 
   return (
     <div className="App" style={{ marginTop: 250 }}>
+      <p>{name}</p>
       <center>
-        {/* Render the fetched data */}
-        {userData.map((user) => (
-          <div key={user.id}>
-            <p>Name: {user.name}</p>
-            <p>Age: {user.age}</p>
-            <hr />
-          </div>
-        ))}
+        <input
+          placeholder="Enter your name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <br />
+        <br />
+        <input
+          placeholder="Enter your age"
+          value={age}
+          onChange={(e) => setAge(e.target.value)}
+        />
+        <br />
+        <br />
+        <button onClick={pushData}>PUSH</button>
       </center>
     </div>
   );
